@@ -1,4 +1,4 @@
-export const QuizData = [
+export const Question1to10 = [
     
     {
         "Question": "What is GitHub primarily used for?",
