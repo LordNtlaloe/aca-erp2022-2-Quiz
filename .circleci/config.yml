@@ -1,30 +1,35 @@
 version: 2.1
 
-orbs:
-  heroku: circleci/heroku@0.0.10
-
 jobs:
   build:
     docker:
-      - image: circleci/node:10.16.3
-    working_directory: ~/repo
+      - image: circleci/node:14
     steps:
       - checkout
-      # install dependencies
       - run:
-          name: Install Dependencies
+          name: Install dependencies
           command: npm install
-      #- run:
-      #    name: Run tests
-      #    command: npm run test
+      - run:
+          name: Run tests
+          command: npm test
+
+  deploy:
+    docker:
+      - image: circleci/node:14
+    steps:
+      - checkout
+      - run:
+          name: Deploy to Vercel
+          command: |
+            npm install -g vercel
+            vercel --prod --token $VERCEL_TOKEN
 
 workflows:
-  heroku_deploy:
+  version: 2
+  build_and_deploy:
     jobs:
       - build
-      - heroku/deploy-via-git: # Use the pre-configured job, deploy-via-git
+      - deploy:
           requires:
             - build
-          filters:
-            branches:
-              only: main
+          context: vercel
