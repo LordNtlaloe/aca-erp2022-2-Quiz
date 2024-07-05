@@ -22,7 +22,7 @@ jobs:
           name: Deploy to Vercel
           command: |
             npm install -g vercel
-            vercel --prod --token $VERCEL_TOKEN
+            vercel --prod --token Hdvm0roe7sy1MesE3YWy9O1Z
 
 workflows:
   version: 2
