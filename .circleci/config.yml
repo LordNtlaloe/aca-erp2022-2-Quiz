@@ -1,35 +1,56 @@
 version: 2.1
-
 jobs:
-  build:
+  preview_deployment:
     docker:
-      - image: circleci/node:14
+      - image: cimg/node:20.5.0
+    environment:
+      VERCEL_ORG_ID: $VERCEL_ORG_ID
+      VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID
     steps:
       - checkout
       - run:
-          name: Install dependencies
-          command: npm install
+          name: Install Vercel CLI
+          command: sudo npm install --global vercel@latest
       - run:
-          name: Run tests
-          command: npm test
+          name: Pull Vercel Environment Information
+          command: sudo vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+      - run:
+          name: Build Project Artifacts
+          command: sudo vercel build --token=$VERCEL_TOKEN
+      - run:
+          name: Deploy Project Artifacts to Vercel
+          command: sudo vercel deploy --prebuilt --token=$VERCEL_TOKEN
 
-  deploy:
+  production_deployment:
     docker:
-      - image: circleci/node:14
+      - image: cimg/node:20.5.0
+    environment:
+      VERCEL_ORG_ID: $VERCEL_ORG_ID
+      VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID
     steps:
       - checkout
       - run:
-          name: Deploy to Vercel
-          command: |
-            npm install -g vercel
-            vercel --prod --token Hdvm0roe7sy1MesE3YWy9O1Z
+          name: Install Vercel CLI
+          command: sudo npm install --global vercel@latest
+      - run:
+          name: Pull Vercel Environment Information
+          command: sudo vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+      - run:
+          name: Build Project Artifacts
+          command: sudo vercel build --prod --token=$VERCEL_TOKEN
+      - run:
+          name: Deploy Project Artifacts to Vercel
+          command: sudo vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
 
 workflows:
   version: 2
-  build_and_deploy:
+  preview_and_production:
     jobs:
-      - build
-      - deploy:
-          requires:
-            - build
-          context: vercel
+      - preview_deployment:
+          filters:
+            branches:
+              ignore: /main/
+      - production_deployment:
+          filters:
+            branches:
+              only: /main/
